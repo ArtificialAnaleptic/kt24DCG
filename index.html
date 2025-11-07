@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-R">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KT2024 - Datacard Editor (Deck Mode)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        /* --- 1. Global & Fonts --- */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        :root {
+            --brand-orange: #f39c12; 
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #2c2c2c; 
+            color: #e0e0e0;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        h2, h3 {
+            border-bottom: 1px solid #666;
+            padding-bottom: 5px;
+            font-weight: 700;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 3px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #aaa;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 8px;
+            background-color: #333;
+            border: 1px solid #555;
+            color: #e0e0e0;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        textarea {
+            resize: vertical; 
+        }
+
+        /* --- 2. Main Layout --- */
+        .app-layout {
+            display: flex;
+        }
+
+        .menu-panel {
+            width: 350px;
+            min-width: 300px; 
+            height: 100vh;
+            padding: 15px;
+            background-color: #1e1e1e;
+            border-right: 2px solid #000;
+            overflow-y: auto; 
+        }
+        
+        .editor-panel {
+            width: 350px;
+            min-width: 300px; 
+            height: 100vh;
+            padding: 15px;
+            background-color: #1e1e1e;
+            border-left: 2px solid #000;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .editor-fields-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 5px; 
+            margin-right: -5px;
+        }
+
+
+        .datacard-container {
+            flex-grow: 1; 
+            padding: 24px;
+            overflow-y: auto; 
+            display: flex;
+            flex-direction: column; 
+            align-items: center;    
+            gap: 20px; 
+            background-color: #555555; 
+            height: 100vh; 
+        }
+
+        /* --- 3. Menu Panel (Left Sidebar) --- */
+        
+        .card-manager {
+            background-color: #2a2a2a;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #444;
+        }
+        .card-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px; /* Increased height */
+            overflow-y: auto;
+            background: #333;
+            border-radius: 4px;
+            border: 1px solid #555;
+        }
+        .card-list-item {
+            padding: 8px 12px;
+            border-bottom: 1px solid #444;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-list-item:last-child {
+            border-bottom: none;
+        }
+        .card-list-item:hover {
+            background-color: #4a4a4a;
+        }
+        .card-list-item.active {
+            background-color: #4a90e2;
+            color: white;
+            font-weight: 700;
+        }
+        .delete-card-btn {
+            background: #d9534f;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            line-height: 24px;
+            text-align: center;
+        }
+        .delete-card-btn:hover {
+            background: #c9302c;
+        }
+
+        .add-button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4a90e2; 
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+        .add-button:hover {
+            background-color: #5aa1f0;
+        }
+        
+        #addNewCardBtn {
+            margin-bottom: 10px;
+        }
+
+        .swap-button, .remove-btn {
+            padding: 8px;
+            background-color: #666;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        .remove-btn {
+            background-color: #d9534f; 
+            width: 100%;
+            margin-top: 8px;
+            margin-left: 0;
+        }
+
+        .unit-identity-group {
+            display: flex;
+            align-items: center;
+        }
+        .identity-fields {
+            flex-grow: 1;
+        }
+        .portrait-upload-group {
+            display: flex;
+        }
+        .portrait-upload-group .add-button {
+            flex-grow: 1;
+        }
+        
+        .stats-input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+        .stats-input-grid label {
+            margin: 0;
+            color: #ccc;
+        }
+        .stats-input-grid input {
+            margin: 0;
+        }
+
+        .weapon-input-group,
+        .ability-input-group {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border: 1px solid #444;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .checkbox-group label {
+            margin: 0;
+            margin-left: 5px;
+            color: #ccc;
+            font-weight: 400;
+        }
+
+        .image-controls-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #333;
+            padding: 5px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .image-controls-container button {
+            background-color: #555;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px 8px;
+            border-radius: 3px;
+        }
+        .image-controls-container button:hover {
+            background-color: #666;
+        }
+        .control-separator {
+            color: #444;
+            font-size: 1.2rem;
+        }
+        
+        .editor-fields-container.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+
+        /* --- 4. Datacard (Right Panel) --- */
+        .main-rectangle {
+            width: 840px; 
+            background-color: #f0f0f0; 
+            color: #1e1e1e; 
+            border: 1px solid #888;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            position: relative; 
+            flex-grow: 0;
+            min-height: 480px; 
+        }
+
+        /* --- 4a. Header & Stats --- */
+        .header {
+            display: flex;
+            justify-content: space-between; 
+            align-items: flex-start; 
+            background-color: #1e1e1e;
+            color: white;
+            padding: 10px 15px;
+            min-height: 100px;
+            position: relative;
+            border-bottom: 4px solid var(--brand-orange);
+            padding-bottom: 15px; 
+        }
+
+        .unit-identity-output {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-width: calc(50% - 70px); 
+            min-width: 140px; 
+        }
+
+        .unit-name {
+            font-size: 2rem;
+            font-weight: 900; 
+            line-height: 1;
+            text-transform: uppercase;
+            position: relative;
+            word-break: break-word;
+        }
+        
+        .unit-name::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -4px;
+            height: 3px;
+            width: 80%;
+            background-color: var(--brand-orange);
+        }
+
+        .unit-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #f0f0f0;
+            text-transform: none; 
+            margin-top: 8px;
+            word-break: break-word;
+        }
+
+        .stats-output-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px; 
+            text-align: center;
+            align-content: center;
+            flex-shrink: 0; 
+            max-width: calc(50% - 70px); 
+            min-width: 140px; 
+        }
+
+        .stat-block {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stat-block-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            line-height: 1;
+            text-transform: uppercase;
+            color: #aaa; 
+        }
+        .stat-block-value {
+            font-size: 2.2rem;
+            font-weight: 900;
+            line-height: 1.1;
+            color: #fff; 
+        }
+
+        /* --- 4b. Portrait Image (The Triangle) --- */
+        .triangle-wrapper {
+            width: 165px;
+            height: 145px; 
+            flex-shrink: 0; 
+            position: relative; 
+            top: 4px; 
+            left: 20px; 
+        }
+
+        .triangle-border {
+            position: absolute;
+            width: 165px; 
+            height: 145px;
+            background-color: var(--brand-orange);
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+        }
+
+        .triangle-container {
+            position: absolute;
+            top: 6px;
+            left: 12px;
+            right: 12px;
+            bottom: 12px; 
+            width: auto; 
+            height: auto; 
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            overflow: hidden; 
+            background-color: #333;
+        }
+
+        .portrait-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; 
+            display: none;
+        }
+
+        .portrait-image.visible {
+            display: block;
+        }
+
+        /* --- 4c: Weapons Table --- */
+        .content-area {
+            padding: 15px;
+            padding-top: 10px; /* Was 25px */
+            flex-grow: 0;
+            flex-shrink: 0;
+        }
+        
+        .weapon-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .weapon-table th,
+        .weapon-table td {
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+            border: none;
+            background-color: transparent;
+        }
+        
+        .weapon-table thead tr {
+             border-bottom: 2px solid var(--brand-orange);
+        }
+
+        .weapon-table th {
+            color: #1e1e1e;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            border-bottom: none; 
+            font-weight: 700;
+        }
+        .weapon-table td {
+            font-size: 0.9rem;
+            border-bottom: 1px solid #ddd;
+        }
+        .weapon-table tbody tr:first-child {
+            border-top: 1px solid var(--brand-orange);
+        }
+
+        .weapon-name-col {
+            width: 40%;
+            font-weight: 700;
+        }
+
+        .weapon-name-inner {
+            display: flex;
+            align-items: center;
+        }
+        
+        .weapon-stat-col {
+            text-align: center;
+            width: 15%;
+            font-weight: 700;
+        }
+        .type-wr-col {
+            text-align: left;
+            width: 30%;
+            font-weight: 400; 
+        }
+
+        .weapon-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            color: var(--brand-orange); 
+        }
+
+        /* --- 4d. Abilities Area --- */
+        .active-abilities-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: #e0e0e0; 
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .active-ability-card {
+            background-color: #f0f0f0; 
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .active-ability-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--brand-orange); 
+            padding: 5px 10px;
+            color: #1e1e1e;
+        }
+        .active-ability-header h4 {
+            margin: 0;
+            font-weight: 900;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        .ability-cost-display {
+            background-color: rgba(0,0,0,0.2);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            font-weight: 700;
+        }
+        .active-ability-description {
+            font-size: 0.9em;
+            padding: 10px;
+        }
+        .active-ability-description p {
+            margin: 0;
+            line-height: 1.4;
+        }
+        .active-ability-description p:not(:first-child) {
+            margin-top: 5px;
+        }
+        .active-ability-description em {
+            font-size: 0.9em;
+            color: #333;
+        }
+        .abilities-area-wrapper {
+            margin-bottom: 15px;
+            border-top: 2px solid var(--brand-orange);
+            margin-top: 15px;
+            padding-top: 10px;
+        }
+        .ability-entry {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--brand-orange);
+            padding-bottom: 5px;
+        }
+        .ability-entry:last-child {
+            margin-bottom: 0;
+        }
+        .ability-entry p {
+            margin: 0;
+        }
+        .ability-entry strong {
+            font-weight: 900;
+        }
+        .positive::before {
+            content: 'f04b '; 
+            font-family: "Font Awesome 6 Free"; 
+            font-weight: 900; 
+            color: #28a745; 
+            margin-right: 5px;
+        }
+        .negative::before {
+            content: '\f0c8 '; 
+            font-family: "Font Awesome 6 Free"; 
+            font-weight: 900; 
+            color: #dc3545; 
+            margin-right: 5px;
+        }
+        .keyword-definitions-area p {
+            font-size: 0.8rem;
+            font-style: italic;
+            color: #333;
+            margin: 0 0 5px 0;
+            padding-left: 10px;
+            border-left: 3px solid #ccc;
+        }
+        .abilities-area {
+            display: block;
+        }
+        .abilities-area.has-passive-and-active {
+            display: flex;
+            gap: 20px;
+        }
+        .abilities-area.has-passive-and-active .passive-abilities {
+            flex-grow: 1; 
+        }
+        .abilities-area.has-passive-and-active .active-abilities-container {
+            flex-shrink: 0;
+            width: 390px; 
+        }
+        .abilities-area.has-active-only .active-abilities-container {
+            width: 100%; 
+        }
+
+        /* --- 4e. Keywords & Base --- */
+        .keywords {
+            margin-top: auto; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1e1e1e;
+            color: white;
+            padding: 10px 15px;
+            min-height: 60px;
+            border-top: 4px solid var(--brand-orange);
+        }
+        .keywords-list {
+            flex-grow: 1;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #e0e0e0; 
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            word-break: break-all;
+        }
+        .keyword-separator {
+            color: #888;
+            font-weight: 700;
+            font-size: 1.1rem;
+            line-height: 0;
+        }
+        .base-size-circle {
+            width: 40px;
+            height: 40px;
+            background-color: #d1d1d1;
+            color: #1e1e1e;
+            border: 2px solid #1e1e1e; 
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+            flex-shrink: 0; 
+        }
+
+        /* --- 5. Modals & Utility --- */
+        .hidden-db, .hidden {
+            display: none;
+        }
+        .help-modal-box {
+            display: none; 
+            position: fixed;
+            z-index: 100;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            background-color: #333;
+            border: 1px solid #888;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.7);
+        }
+        .close-btn {
+            float: right;
+            font-size: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .close-btn:hover {
+            color: #aaa;
+        }
+        .modal-sections {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .modal-section-to-add, .modal-section-to-fix {
+            width: 50%;
+        }
+        .modal-section-to-add ul, .modal-section-to-fix ul {
+            padding-left: 20px;
+        }
+        .toggle-menu {
+            display: none; 
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 101;
+            background: #333;
+            color: white;
+            border: 1px solid white;
+            padding: 10px 15px;
+            font-size: 1.5rem;
+        }
+
+
+        /* --- 6. Mobile & Print Styles --- */
+        @media (max-width: 800px) {
+            .app-layout {
+                flex-direction: column;
+            }
+            .menu-panel {
+                width: 100%;
+                height: auto;
+                max-height: 50vh; 
+                border-right: none;
+                border-bottom: 2px solid #000;
+                order: 1; 
+            }
+            .editor-panel { 
+                width: 100%;
+                height: auto;
+                max-height: 50vh; 
+                border-left: none;
+                border-bottom: 2px solid #000;
+                order: 2; 
+            }
+            .menu-panel.hidden, .editor-panel.hidden { 
+                display: none;
+            }
+            .datacard-container {
+                order: 3; 
+                height: auto;
+                padding: 10px;
+            }
+            .main-rectangle {
+                width: 100%; 
+                min-height: 0;
+            }
+            .toggle-menu {
+                display: block; 
+            }
+            .header {
+                flex-direction: column;
+            }
+            .stats-output-grid {
+                grid-template-columns: repeat(4, 1fr); 
+                width: 100%;
+                margin-top: 60px; 
+                padding-left: 0; 
+                gap: 5px;
+            }
+            .stat-block-value {
+                font-size: 1.8rem;
+            }
+            .triangle-wrapper {
+                top: 50px;
+                width: 100px;
+                height: 100px;
+            }
+            .abilities-area.has-passive-and-active {
+                display: block;
+            }
+            .abilities-area.has-passive-and-active .active-abilities-container {
+                width: 100%;
+                margin-top: 15px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="menu-panel">
+            
+            <h2>Kill Team 2024 Data<br>Card Creator 
+                <span class="help-toggle" id="helpToggleBtn" title="About this Tool"><i class="fas fa-info-circle"></i></span>
+            </h2>
+               
+            <div class="card-manager">
+                <h3>Card Manager</h3>
+                <button id="addNewCardBtn" class="add-button" style="margin-bottom: 10px;">+ Add New Card</button>
+                <ul class="card-list" id="cardManagerList">
+                    </ul>
+            </div>
+            
+            <h3>Weapons Rules Database (Name: Definition)</h3>
+            <textarea id="keywordDatabase" rows="5" class="hidden-db">
+Accurate x: Retain x normal hits without rolling. (up to 2)
+Balanced: Re-roll one attack dice.
+Blast x: Make attacks against all operatives within x" of the target, visible to the target.
+Brutal: Can only be blocked with Criticals.
+Ceaseless: Re-roll all results of one number (e.g. 2's).
+Devastating x: Crits inflict x damage immediately, before rolling saves.
+D* Devastating x: Crits inflict x damage to all operatives within D".
+Heavy: Cannot shoot in the same activation as moved.
+Heavy (x only): Can only move x" in the same activation as shooting.
+Hot: After shooting, roll 1D6. If lower than the Hit stat, suffer 2x result damage.
+Lethal x: Inflict crits with x+ instead of 6+.
+Limited x: Has x uses per battle (multi-attack like Blast counts as one use).
+Piercing x: Remove x defence dice before rolling.
+Piercing x Crits: Remove x defence dice before rolling, if a critical success is rolled.
+Punishing: Retain a fail as a success if any crits are retained.
+Range x: Target must be within x" of the shooter.
+Relentless: Re-roll any or all attack dice.
+Rending: Convert a hit to a critical if any crits are retained.
+Saturate: The defender cannot retain any cover saves.
+Seek: Targets cannot use terrain for cover.
+Seek Light: Targets cannot use light terrain for cover.
+Severe: Convert a hit to a critical if no criticals are retained.
+Shock: First Critical strike discards opponent's worst success.
+Silent: Can Shoot whilst on a conceal order.
+Stun: Remove 1APL from the target if any Critical Successes are retained.
+Torrent x: Make attacks against all operatives within x" of the target, visible to the shooter.</textarea>
+            <button id="toggleDbBtn">Toggle Database</button>
+            
+            <h3 style="margin-top: 15px;">Import / Export Deck</h3>
+            <button id="exportDeckBtn" class="add-button" style="background-color: var(--brand-orange); margin-top: 10px;">Export Deck (JSON)</button>
+            <button id="importDeckBtn" class="add-button" style="margin-top: 10px;">Import Deck (JSON)</button>
+            <input type="file" id="importDeckFile" accept="application/json" style="display: none;">
+            <input type="file" id="importDeckFile" accept="application/json" style="display: none;">
+
+            <button id="resetDeckBtn" class="add-button" style="background-color: #d9534f; margin-top: 15px;">Reset Deck (Wipe All)</button>
+
+        </aside>
+
+        <main class="datacard-container" id="datacardContainer">
+            </main>
+        
+        <aside class="editor-panel">
+            
+            <div class="editor-fields-container" id="editorFieldsContainer">
+                <h3>Unit Identity</h3>
+                <div class="unit-identity-group">
+                    <div class="identity-fields">
+                        <label for="unitNameInput">Unit Name</label>
+                        <input type="text" id="unitNameInput" value="Operative Name">
+                        <label for="unitTitleInput">Unit Title</label>
+                        <input type="text" id="unitTitleInput" value="Operative Title">
+                    </div>
+                    <button id="swapNamesBtn" class="swap-button" title="Swap Name and Title">
+                        <i class="fas fa-exchange-alt"></i> 
+                    </button>
+                </div>
+                <label for="portraitFile">Portrait Image</label>
+                <div class="portrait-upload-group">
+                    <input type="file" id="portraitFile" accept="image/*" style="display: none;">
+                    <button id="uploadPortraitBtn" class="add-button" type="button">Upload Image</button>
+                    <button id="clearPortraitBtn" class="swap-button" type="button" title="Clear Image">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="image-controls-container">
+                    <button id="moveUpBtn" title="Move Up"><i class="fas fa-arrow-up"></i></button>
+                    <button id="moveDownBtn" title="Move Down"><i class="fas fa-arrow-down"></i></button>
+                    <button id="moveLeftBtn" title="Move Left"><i class="fas fa-arrow-left"></i></button>
+                    <button id="moveRightBtn" title="Move Right"><i class="fas fa-arrow-right"></i></button>
+                    <span class="control-separator">|</span>
+                    <button id="zoomOutBtn" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
+                    <button id="zoomInBtn" title="Zoom In"><i class="fas fa-search-plus"></i></button>
+                    <span class="control-separator">|</span>
+                    <button id="fitToggleBtn" title="Toggle Image Fit: Cover/Contain">Fit</button>
+                </div>
+                
+                <h3>Card Dimensions</h3>
+                <div class="card-sliders-container">
+                    <label for="cardWidthSlider">Card Width: <span id="cardWidthValue">600</span>px</label>
+                    <input type="range" id="cardWidthSlider" min="600" max="1200" value="600" style="width: 100%;">
+                    
+                    <label for="cardHeightSlider">Min Height: <span id="cardHeightValue">480</span>px</label>
+                    <input type="range" id="cardHeightSlider" min="300" max="1400" value="480" style="width: 100%;">
+                </div>
+
+                <h3>Stats</h3>
+                <div class="stats-input-grid">
+                    <label for="aplValue">APL</label>
+                    <input type="number" id="aplValue" value="3">
+                    <label for="moveValue">MOVE</label>
+                    <input type="text" id="moveValue" value="6&quot;">
+                    <label for="saveValue">SAVE</label>
+                    <input type="text" id="saveValue" value="3+">
+                    <label for="woundsValue">WOUNDS</label>
+                    <input type="number" id="woundsValue" value="15">
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="displayKeywordDefinitions" checked>
+                    <label for="displayKeywordDefinitions">Display Weapons Rules Definitions</label>
+                </div>
+                
+                <h3>Weapons Editor</h3>
+                <div id="weaponInputsContainer">
+                    </div>
+                <button id="addWeaponBtn" class="add-button">+ Add Weapon</button>
+                
+                <h3>Abilities Editor</h3>
+                <div id="abilityInputsContainer">
+                    </div>
+                <button id="addAbilityBtn" class="add-button">+ Add Ability</button>
+                
+                <label for="keywordsInput">Operative Keywords (comma-separated)</label>
+                <input type="text" id="keywordsInput" value="TEAM NAME, FACTION, SUBFACTION, RANK">
+
+                <label for="baseSizeInput">Base Size (mm)</label>
+                <input type="number" id="baseSizeInput" value="25">
+            </div> </aside>
+    </div>
+    
+    <template id="dataCardTemplate">
+        <div class="main-rectangle" data-card-id=""> 
+            
+            <div class="header">
+                <div class="unit-identity-output">
+                    <div class="unit-name" data-output="unitName">UNIT NAME</div>
+                    <div class="unit-title" data-output="unitTitle"></div>
+                </div>
+                
+                <div class="triangle-wrapper">
+                    <div class="triangle-border"></div>
+                    <div class="triangle-container">
+                         <img alt="Portrait" class="portrait-image" data-output="portrait">
+                    </div>
+                </div>
+
+                <div class="stats-output-grid">
+                    <div class="stat-block">
+                        <div class="stat-block-label">APL</div>
+                        <div class="stat-block-value" data-output="aplValue">3</div>
+                    </div>
+                    <div class="stat-block">
+                        <div class="stat-block-label">MOVE</div>
+                        <div class="stat-block-value" data-output="moveValue">6"</div>
+                    </div>
+                    <div class="stat-block">
+                        <div class="stat-block-label">SAVE</div>
+                        <div class="stat-block-value" data-output="saveValue">3+</div>
+                    </div>
+                    <div class="stat-block">
+                        <div class="stat-block-label">WOUNDS</div>
+                        <div class="stat-block-value" data-output="woundsValue">15</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="weapons-area">
+                    <table class="weapon-table">
+                        <thead>
+                            <tr>
+                                <th class="weapon-name-col">Weapon</th>
+                                <th class="weapon-stat-col">ATK</th>
+                                <th class="weapon-stat-col">HIT</th> <th class="weapon-stat-col">DMG</th>
+                                <th class="type-wr-col">Rules</th>
+                            </tr>
+                        </thead>
+                        <tbody data-output="weaponTableBody">
+                            </tbody>
+                    </table>
+                </div>
+                
+                <div class="abilities-area-wrapper">
+                    <div class="abilities-area" data-output="dataCardContentArea">
+                        <div class="passive-abilities" data-output="passiveAbilitiesOutput">
+                            </div>
+                        <div class="active-abilities-container" data-output="activeAbilitiesContainer" style="display: none;">
+                            </div>
+                    </div>
+                </div>
+                <div class="keyword-definitions-area" data-output="keywordDefinitionsOutput">
+                    </div>
+            </div>
+
+            <div class="keywords">
+                <div class="keywords-list" data-output="dataCardKeywords">
+                    </div>
+                <div class="base-size-circle" data-output="baseSizeOutput">
+                    25
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <div class="help-modal-box" id="helpModal">
+        <span class="close-btn" id="closeHelpBtn" title="Close"><i class="fas fa-times"></i></span>
+        <p><strong>This tool is based heavily on the work of /u/setounet.</strong><br>I was given a partial version of this adapted version and attempted to fix it.</p>
+        <p>HTML is really not my strong point so if this hasn't been updated it's worth checking out /u/setounet's  <a href="https://www.kttools.app" target="_blank" rel="noopener noreferrer">https://www.kttools.app</a> to see if he's improved it instead :)</p>
+        
+        <div class="modal-sections">
+            <div class="modal-section-to-add">
+                <h4>To be added:</h4>
+                <ul>
+                    <li>Print options. I tried this but it's quite hard to get it to print exactly how it looks in the page. I would recommend zooming the page as far as your monitor allows and screenclipping it into your favorite image editor to save it (WINDOWS+SHIFT+S).</li>
+                    <li>Something to highlight the current card you're working on.</li>
+                    <li>Probably a toggle to hide the side bars so you can just use the site with your cards if you like.</li>
+                </ul>
+            </div>
+            <div class="modal-section-to-fix">
+                <h4>To be fixed:</h4>
+                <ul>
+                    <li>Formatting on Passive abilities is currently a little broken. I'll probably fix that.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <button class="toggle-menu" id="menuToggle">☰ Menu</button>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- 0. ELEMENT SELECTORS (MENU) ---
+        
+        // Card Manager
+        const cardManagerList = document.getElementById('cardManagerList');
+        const addNewCardBtn = document.getElementById('addNewCardBtn');
+        const editorFieldsContainer = document.getElementById('editorFieldsContainer');
+        
+        // Inputs
+        const unitNameInput = document.getElementById('unitNameInput');
+        const unitTitleInput = document.getElementById('unitTitleInput');
+        const swapNamesBtn = document.getElementById('swapNamesBtn');
+
+        const portraitFile = document.getElementById('portraitFile');
+        const uploadPortraitBtn = document.getElementById('uploadPortraitBtn');
+        const clearPortraitBtn = document.getElementById('clearPortraitBtn');
+        const moveUpBtn = document.getElementById('moveUpBtn');
+        const moveDownBtn = document.getElementById('moveDownBtn');
+        const moveLeftBtn = document.getElementById('moveLeftBtn');
+        const moveRightBtn = document.getElementById('moveRightBtn');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const fitToggleBtn = document.getElementById('fitToggleBtn');
+
+        const aplValue = document.getElementById('aplValue');
+        const moveValue = document.getElementById('moveValue');
+        const saveValue = document.getElementById('saveValue');
+        const woundsValue = document.getElementById('woundsValue');
+        const displayKeywordDefinitions = document.getElementById('displayKeywordDefinitions');
+
+        const weaponInputsContainer = document.getElementById('weaponInputsContainer');
+        const addWeaponBtn = document.getElementById('addWeaponBtn');
+        const abilityInputsContainer = document.getElementById('abilityInputsContainer');
+        const addAbilityBtn = document.getElementById('addAbilityBtn');
+
+        const keywordsInput = document.getElementById('keywordsInput');
+        const baseSizeInput = document.getElementById('baseSizeInput');
+
+        const keywordDatabase = document.getElementById('keywordDatabase');
+        const toggleDbBtn = document.getElementById('toggleDbBtn');
+
+        const helpToggleBtn = document.getElementById('helpToggleBtn');
+        const closeHelpBtn = document.getElementById('closeHelpBtn');
+        const helpModal = document.getElementById('helpModal');
+
+        const menuToggle = document.getElementById('menuToggle');
+        const menuPanel = document.querySelector('.menu-panel');
+        const editorPanel = document.querySelector('.editor-panel'); 
+
+        const cardWidthSlider = document.getElementById('cardWidthSlider');
+        const cardWidthValue = document.getElementById('cardWidthValue');
+        const cardHeightSlider = document.getElementById('cardHeightSlider');
+        const cardHeightValue = document.getElementById('cardHeightValue');
+        
+        // Main containers
+        const datacardContainer = document.getElementById('datacardContainer');
+        const dataCardTemplate = document.getElementById('dataCardTemplate');
+        
+        // NEW: Import/Export selectors
+        const exportDeckBtn = document.getElementById('exportDeckBtn');
+        const importDeckBtn = document.getElementById('importDeckBtn');
+        const importDeckFile = document.getElementById('importDeckFile');
+        const resetDeckBtn = document.getElementById('resetDeckBtn'); // 
+
+
+        // --- SECTION A: STATE MANAGEMENT ---
+        
+        let cardCollection = []; 
+        let activeCardId = null;
+        let dbMap = new Map(); 
+        let globalCardWidth = 840; // This is the default
+        
+        function createDefaultCardData() {
+            const newId = Date.now().toString();
+            return {
+                id: newId,
+                unitName: 'New Operative',
+                unitTitle: 'Operative Title',
+                portrait: {
+                    src: '',
+                    posX: 0,
+                    posY: 0,
+                    scale: 1,
+                    fit: 'cover'
+                },
+                cardDimensions: {
+                    height: 480
+                },
+                stats: {
+                    apl: 3,
+                    move: '6"',
+                    save: '3+',
+                    wounds: 15
+                },
+                showDefinitions: true,
+                weapons: [
+                    { id: Date.now() + 1, name: 'Weapon 1', type: 'Ranged', atk: '3', hit: '3+', dmg: '3/4', rules: 'Lethal 5' }
+                ],
+                abilities: [
+                    { id: Date.now() + 2, type: 'Passive', title: 'Ability 1', cost: '', once: false, effect: 'Effect description...\n+ A positive effect.\n- A negative effect.' }
+                ],
+                keywords: 'TEAM NAME, FACTION, SUBFACTION, RANK',
+                baseSize: 25
+            };
+        }
+        
+        function getCardData(cardId) {
+            return cardCollection.find(card => card.id === cardId);
+        }
+        
+        // --- SECTION B: CORE DATA FUNCTIONS (Create, Delete, Set Active) ---
+        
+        function createNewCard() {
+            const newCard = createDefaultCardData();
+            cardCollection.push(newCard);
+            
+            const newCardElement = createCardElement(newCard);
+            datacardContainer.appendChild(newCardElement);
+            
+            setActiveCard(newCard.id); 
+            renderCardManagerList();
+            
+            saveDeckToLocalStorage(); 
+        }
+        
+        function deleteCard(cardId) {
+            cardCollection = cardCollection.filter(card => card.id !== cardId);
+            
+            const cardElement = datacardContainer.querySelector(`.main-rectangle[data-card-id="${cardId}"]`);
+            if (cardElement) {
+                cardElement.remove();
+            }
+            
+            if (activeCardId === cardId) {
+                const newActiveCard = cardCollection.length > 0 ? cardCollection[0].id : null;
+                setActiveCard(newActiveCard);
+            } else {
+                renderCardManagerList();
+            }
+            
+            saveDeckToLocalStorage(); 
+        }
+        
+        function setActiveCard(cardId) {
+            activeCardId = cardId;
+            
+            if (activeCardId) {
+                loadCardDataToMenu();
+                editorFieldsContainer.classList.remove('disabled');
+
+                const cardElement = datacardContainer.querySelector(`.main-rectangle[data-card-id="${cardId}"]`);
+                if (cardElement) {
+                    cardElement.scrollIntoView({
+                        behavior: 'smooth', 
+                        block: 'center'      
+                    });
+                }
+
+            } else {
+                editorFieldsContainer.classList.add('disabled');
+            }
+            
+            renderCardManagerList();
+        }
+
+        // --- SECTION C: DOM/DATA SYNC FUNCTIONS (Load to Menu, Save from Menu) ---
+
+        function loadCardDataToMenu() {
+            const cardData = getCardData(activeCardId);
+            if (!cardData) return;
+
+            unitNameInput.value = cardData.unitName;
+            unitTitleInput.value = cardData.unitTitle;
+            aplValue.value = cardData.stats.apl;
+            moveValue.value = cardData.stats.move;
+            saveValue.value = cardData.stats.save;
+            woundsValue.value = cardData.stats.wounds;
+            displayKeywordDefinitions.checked = cardData.showDefinitions;
+            keywordsInput.value = cardData.keywords;
+            baseSizeInput.value = cardData.baseSize;
+            
+            // globalCardWidth is loaded from localStorage on init now
+            cardWidthSlider.value = globalCardWidth; 
+            cardWidthValue.textContent = globalCardWidth; 
+            cardHeightSlider.value = cardData.cardDimensions.height;
+            cardHeightValue.textContent = cardData.cardDimensions.height;
+
+            weaponInputsContainer.innerHTML = ''; 
+            cardData.weapons.forEach(weapon => {
+                const weaponHtml = createWeaponInputGroup(weapon);
+                weaponInputsContainer.insertAdjacentHTML('beforeend', weaponHtml);
+            });
+            
+            abilityInputsContainer.innerHTML = ''; 
+            cardData.abilities.forEach(ability => {
+                const abilityHtml = createAbilityInputGroup(ability);
+                abilityInputsContainer.insertAdjacentHTML('beforeend', abilityHtml);
+            });
+        }
+        
+        function updateActiveCardFromMenu() {
+            const cardData = getCardData(activeCardId);
+            if (!cardData) return;
+
+            cardData.unitName = unitNameInput.value;
+            cardData.unitTitle = unitTitleInput.value;
+            cardData.stats.apl = aplValue.value;
+            cardData.stats.move = moveValue.value;
+            cardData.stats.save = saveValue.value;
+            cardData.stats.wounds = woundsValue.value;
+            cardData.showDefinitions = displayKeywordDefinitions.checked;
+            cardData.keywords = keywordsInput.value;
+            cardData.baseSize = baseSizeInput.value;
+            
+            cardData.cardDimensions.height = cardHeightSlider.value;
+            
+            cardData.weapons = []; 
+            weaponInputsContainer.querySelectorAll('.weapon-input-group').forEach(group => {
+                cardData.weapons.push({
+                    id: group.dataset.id,
+                    name: group.querySelector('.weapon-name').value,
+                    type: group.querySelector('.weapon-type').value,
+                    atk: group.querySelector('.weapon-atk').value,
+                    hit: group.querySelector('.weapon-hit').value,
+                    dmg: group.querySelector('.weapon-dmg').value,
+                    rules: group.querySelector('.weapon-rules').value
+                });
+            });
+            
+            cardData.abilities = []; 
+            abilityInputsContainer.querySelectorAll('.ability-input-group').forEach(group => {
+                cardData.abilities.push({
+                    id: group.dataset.id,
+                    type: group.querySelector('.ability-type').value,
+                    title: group.querySelector('.ability-title').value,
+                    cost: group.querySelector('.ability-cost').value,
+                    once: group.querySelector('.ability-cost-once').checked,
+                    effect: group.querySelector('.ability-effect').value
+                });
+            });
+            
+            updateCardDisplay(cardData);
+            
+            const managerItem = cardManagerList.querySelector(`.card-list-item[data-id="${activeCardId}"] .card-list-name`);
+            if(managerItem) managerItem.textContent = cardData.unitName;
+            
+            saveDeckToLocalStorage(); 
+        }
+
+        // --- SECTION D: DYNAMIC INPUT GROUP CREATORS ---
+        
+        function createWeaponInputGroup(weapon) {
+            return `
+                <div class="weapon-input-group" data-id="${weapon.id}">
+                    <label>Name</label>
+                    <input type="text" class="weapon-name" value="${weapon.name}">
+                    <div class="stats-input-grid weapon-stats">
+                        <label>Type</label>
+                        <select class="weapon-type">
+                            <option value="Ranged" ${weapon.type === 'Ranged' ? 'selected' : ''}>Ranged</option>
+                            <option value="Melee" ${weapon.type === 'Melee' ? 'selected' : ''}>Melee</option>
+                        </select>
+                        <label>ATK</label>
+                        <input type="text" class="weapon-atk" value="${weapon.atk}">
+                        <label>HIT</label>
+                        <input type="text" class="weapon-hit" value="${weapon.hit}">
+                        <label>DMG</label>
+                        <input type="text" class="weapon-dmg" value="${weapon.dmg}">
+                    </div>
+                    <label>Weapons Rules (comma-separated)</label>
+                    <textarea class="weapon-rules" rows="2">${weapon.rules}</textarea>
+                    <button class="remove-btn" data-remove="weapon" data-id="${weapon.id}">Remove</button>
+                </div>
+            `;
+        }
+
+        function createAbilityInputGroup(ability) {
+            return `
+                <div class="ability-input-group" data-id="${ability.id}">
+                    <label>Type</label>
+                    <select class="ability-type">
+                        <option value="Passive" ${ability.type === 'Passive' ? 'selected' : ''}>Passive</option>
+                        <option value="Active" ${ability.type === 'Active' ? 'selected' : ''}>Active</option>
+                    </select>
+                    
+                    <label>Title</label>
+                    <input type="text" class="ability-title" value="${ability.title}">
+                    
+                    <div class="ability-costs">
+                        <label>Cost</label>
+                        <input type="text" class="ability-cost" value="${ability.cost}">
+                        <div class="checkbox-group">
+                        <input type="checkbox" class="ability-cost-once" id="cost-once-${ability.id}" ${ability.once ? 'checked' : ''}>
+                        <label for="cost-once-${ability.id}">Once per battle?</label>
+                        </div>
+                    </div>
+
+                    <label>Effect description...</label>
+                    <textarea class="ability-effect" rows="3">${ability.effect}</textarea>
+                    <button class="remove-btn" data-remove="ability" data-id="${ability.id}">Remove</button>
+                </div>
+            `;
+        }
+        
+        function addWeaponToMenu() {
+            const cardData = getCardData(activeCardId);
+            if (!cardData) return;
+            
+            const newWeapon = {
+                id: Date.now(),
+                name: `Weapon ${cardData.weapons.length + 1}`,
+                type: 'Ranged',
+                atk: '3',
+                hit: '4+',
+                dmg: '2/3',
+                rules: ''
+            };
+            
+            cardData.weapons.push(newWeapon);
+            
+            const weaponHtml = createWeaponInputGroup(newWeapon);
+            weaponInputsContainer.insertAdjacentHTML('beforeend', weaponHtml);
+            
+            updateCardDisplay(cardData);
+            
+            saveDeckToLocalStorage();
+        }
+        
+        function addAbilityToMenu() {
+            const cardData = getCardData(activeCardId);
+            if (!cardData) return;
+            
+            const newAbility = {
+                id: Date.now(),
+                type: 'Passive',
+                title: `Ability ${cardData.abilities.length + 1}`,
+                cost: '1AP',
+                once: false,
+                effect: ''
+            };
+            
+            cardData.abilities.push(newAbility);
+            
+            const abilityHtml = createAbilityInputGroup(newAbility);
+            abilityInputsContainer.insertAdjacentHTML('beforeend', abilityHtml);
+            
+            updateCardDisplay(cardData);
+            
+            saveDeckToLocalStorage();
+        }
+
+        // --- SECTION E: RENDER FUNCTIONS (The "Deck") ---
+        
+        function renderCardManagerList() {
+            cardManagerList.innerHTML = ''; 
+            
+            if (cardCollection.length === 0) {
+                cardManagerList.innerHTML = '<li class="card-list-item">No cards yet!</li>';
+                return;
+            }
+            
+            cardCollection.forEach(card => {
+                const item = document.createElement('li');
+                item.className = 'card-list-item';
+                item.dataset.id = card.id;
+                if (card.id === activeCardId) {
+                    item.classList.add('active');
+                }
+                
+                item.innerHTML = `
+                    <span class="card-list-name">${card.unitName}</span>
+                    <button class="delete-card-btn" data-id="${card.id}">&times;</button>
+                `;
+                
+                item.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('delete-card-btn')) {
+                        deleteCard(card.id);
+                    } else {
+                        setActiveCard(card.id);
+                    }
+                });
+                
+                cardManagerList.appendChild(item);
+            });
+        }
+        
+        function createCardElement(cardData) {
+            const cardClone = dataCardTemplate.content.cloneNode(true);
+            const cardElement = cardClone.querySelector('.main-rectangle');
+            cardElement.dataset.cardId = cardData.id;
+            
+            cardElement.addEventListener('click', () => {
+                setActiveCard(cardData.id);
+            });
+
+            updateCardDisplay(cardData, cardElement);
+            
+            return cardElement;
+        }
+
+        function updateCardDisplay(cardData, cardElement = null) {
+            if (!cardData) return;
+
+            if (!cardElement) {
+                cardElement = datacardContainer.querySelector(`.main-rectangle[data-card-id="${cardData.id}"]`);
+            }
+            if (!cardElement) return; 
+            
+            // --- 0. Selectors ---
+            const dataCardUnitName = cardElement.querySelector('[data-output="unitName"]');
+            const dataCardUnitTitle = cardElement.querySelector('[data-output="unitTitle"]');
+            const dataCardPortrait = cardElement.querySelector('[data-output="portrait"]');
+            const aplValueOutput = cardElement.querySelector('[data-output="aplValue"]');
+            const moveValueOutput = cardElement.querySelector('[data-output="moveValue"]');
+            const saveValueOutput = cardElement.querySelector('[data-output="saveValue"]');
+            const woundsValueOutput = cardElement.querySelector('[data-output="woundsValue"]');
+            const weaponTableBody = cardElement.querySelector('[data-output="weaponTableBody"]');
+            const parentContainer = cardElement.querySelector('[data-output="dataCardContentArea"]');
+            const passiveAbilitiesOutput = cardElement.querySelector('[data-output="passiveAbilitiesOutput"]');
+            const activeAbilitiesContainer = cardElement.querySelector('[data-output="activeAbilitiesContainer"]');
+            const keywordDefinitionsOutput = cardElement.querySelector('[data-output="keywordDefinitionsOutput"]');
+            const dataCardKeywords = cardElement.querySelector('[data-output="dataCardKeywords"]');
+            const baseSizeOutput = cardElement.querySelector('[data-output="baseSizeOutput"]');
+
+
+            // --- 1. Dimensions & Portrait ---
+            
+            cardElement.style.width = `${globalCardWidth}px`; 
+            cardElement.style.minHeight = `${cardData.cardDimensions.height}px`;
+            
+            if (cardData.portrait.src) {
+                dataCardPortrait.src = cardData.portrait.src;
+                dataCardPortrait.classList.add('visible');
+            } else {
+                dataCardPortrait.src = '';
+                dataCardPortrait.classList.remove('visible');
+            }
+            dataCardPortrait.style.transform = `translate(${cardData.portrait.posX}px, ${cardData.portrait.posY}px) scale(${cardData.portrait.scale})`;
+            dataCardPortrait.style.objectFit = cardData.portrait.fit;
+
+            // --- 2. Simple Stats ---
+            dataCardUnitName.textContent = cardData.unitName.toUpperCase();
+            dataCardUnitTitle.textContent = cardData.unitTitle; 
+            aplValueOutput.textContent = cardData.stats.apl;
+            moveValueOutput.textContent = cardData.stats.move;
+            saveValueOutput.textContent = cardData.stats.save;
+            woundsValueOutput.textContent = cardData.stats.wounds;
+            baseSizeOutput.textContent = cardData.baseSize;
+
+            // --- 3. Keywords ---
+            const keywordsArray = cardData.keywords.split(',')
+                .map(k => k.trim().toUpperCase())
+                .filter(k => k); 
+            const keywordsHTML = keywordsArray.join(' <span class="keyword-separator">&bull;</span> ');
+            dataCardKeywords.innerHTML = keywordsHTML;
+
+            // --- 4. Abilities ---
+            passiveAbilitiesOutput.innerHTML = '';
+            activeAbilitiesContainer.innerHTML = '';
+            parentContainer.className = 'abilities-area'; 
+            passiveAbilitiesOutput.style.display = 'none';
+            activeAbilitiesContainer.style.display = 'none';
+
+            let hasPassiveAbility = false;
+            let hasActiveAbility = false;
+
+            cardData.abilities.forEach(ability => {
+                const parsedEffect = formatAbilityDescription(ability.effect); 
+                
+                if (ability.type === 'Passive') {
+                    hasPassiveAbility = true;
+                    let costHTML = '';
+                    if (ability.cost) {
+                        costHTML = ` (${ability.cost}${ability.once ? ', Once per battle' : ''})`;
+                    }
+                    const abilityHTML = `
+                        <div class="ability-entry">
+                            <p><strong>${ability.title}${costHTML}:</strong></p>
+                            ${parsedEffect}
+                        </div>
+                    `;
+                    passiveAbilitiesOutput.insertAdjacentHTML('beforeend', abilityHTML);
+
+                } else { // Active
+                    hasActiveAbility = true;
+                    const abilityHTML = `
+                        <div class="active-ability-card">
+                            <div class="active-ability-header">
+                                <h4>${ability.title}</h4>
+                                ${ability.cost ? `<span class="ability-cost-display">${ability.cost}</span>` : ''}
+                            </div>
+                            <div class="active-ability-description">
+                                ${parsedEffect}
+                                ${ability.once ? `<p><em>(Once per battle)</em></p>` : ''}
+                            </div>
+                        </div>
+                    `;
+                    activeAbilitiesContainer.insertAdjacentHTML('beforeend', abilityHTML);
+                }
+            });
+
+            if (hasPassiveAbility && !hasActiveAbility) {
+                parentContainer.classList.add('has-passive-only');
+                passiveAbilitiesOutput.style.display = 'block';
+            } else if (hasPassiveAbility && hasActiveAbility) {
+                parentContainer.classList.add('has-passive-and-active');
+                passiveAbilitiesOutput.style.display = 'block';
+                activeAbilitiesContainer.style.display = 'flex';
+            } else if (!hasPassiveAbility && hasActiveAbility) {
+                parentContainer.classList.add('has-active-only');
+                activeAbilitiesContainer.style.display = 'flex';
+            }
+            
+            // --- 5. Weapons & Rules ---
+            weaponTableBody.innerHTML = '';
+            keywordDefinitionsOutput.innerHTML = '';
+            
+            const allRules = new Set(); 
+            
+            cardData.weapons.forEach(weapon => {
+                const iconHTML = weapon.type === 'Ranged' 
+                    ? '<i class="fas fa-crosshairs weapon-icon"></i>' 
+                    : '<i class="fas fa-gavel weapon-icon"></i>'; 
+
+                const weaponRowHTML = `
+                    <tr>
+                        <td class="weapon-name-col">
+                            <div class="weapon-name-inner">
+                                ${iconHTML}
+                                <span>${weapon.name}</span>
+                            </div>
+                        </td>
+                        <td class="weapon-stat-col">${weapon.atk}</td>
+                        <td class="weapon-stat-col">${weapon.hit}</td>
+                        <td class="weapon-stat-col">${weapon.dmg}</td>
+                        <td class="type-wr-col">${weapon.rules}</td>
+                    </tr>
+                `;
+                weaponTableBody.insertAdjacentHTML('beforeend', weaponRowHTML);
+
+                if (weapon.rules) {
+                    weapon.rules.split(',')
+                        .map(r => r.trim())
+                        .filter(r => r) 
+                        .forEach(r => allRules.add(r));
+                }
+            });
+
+            // --- 6. Render Keyword Definitions ---
+            if (cardData.showDefinitions) {
+                allRules.forEach(rule => {
+                    const baseRule = findBaseRule(rule, dbMap); 
+                    if (baseRule) {
+                        let definition = dbMap.get(baseRule);
+                        
+                        if (baseRule !== rule) { 
+                            const ruleParts = rule.split(' ');
+                            const xValue = ruleParts[ruleParts.length - 1];
+                            definition = definition.replace(/ x/g, ` ${xValue}`);
+                            definition = definition.replace(/\(x/g, `(${xValue}`);
+                        }
+
+                        const definitionHTML = `
+                            <p class="rule-definition">
+                                <strong>${rule}:</strong> ${definition}
+                            </p>
+                        `;
+                        keywordDefinitionsOutput.insertAdjacentHTML('beforeend', definitionHTML);
+                    }
+                });
+            }
+        }
+
+
+        // --- SECTION F: HELPER FUNCTIONS ---
+        
+        // NEW: Export function
+        function exportDeck() {
+            // Use 2-space indentation for readability
+            const jsonString = JSON.stringify(cardCollection, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'killteam_deck.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Storage function
+        function saveDeckToLocalStorage() {
+            try {
+                const jsonString = JSON.stringify(cardCollection);
+                localStorage.setItem('kt2024Deck', jsonString);
+            } catch (error) {
+                console.error('Failed to save deck to localStorage:', error);
+                // This might happen if storage is full or has Base64 images that are too large
+            }
+        }
+        
+        // New function to save just the global width
+        function saveGlobalWidthToLocalStorage() {
+            localStorage.setItem('kt2024GlobalWidth', globalCardWidth);
+        }
+        
+        // New function to load just the global width
+        function loadGlobalWidthFromLocalStorage() {
+            const savedWidth = localStorage.getItem('kt2024GlobalWidth');
+            if (savedWidth) {
+                globalCardWidth = parseInt(savedWidth, 10);
+                // Also update the slider UI to match the loaded value
+                cardWidthSlider.value = globalCardWidth;
+                cardWidthValue.textContent = globalCardWidth;
+            }
+        }
+        
+        // NEW: Import function
+        function importDeck(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    // Basic validation
+                    if (!Array.isArray(importedData)) {
+                        throw new Error('Imported file is not a valid card array.');
+                    }
+                    
+                    // Nuke and rebuild
+                    cardCollection = importedData;
+                    datacardContainer.innerHTML = ''; // Clear existing cards
+                    
+                    // Re-create all card elements
+                    cardCollection.forEach(cardData => {
+                        const newCardElement = createCardElement(cardData);
+                        datacardContainer.appendChild(newCardElement);
+                    });
+                    
+                    // Set the first card as active
+                    const newActiveId = cardCollection.length > 0 ? cardCollection[0].id : null;
+                    setActiveCard(newActiveId);
+                    
+                    // Reset file input to allow re-importing the same file
+                    event.target.value = null;
+                    
+                    saveDeckToLocalStorage(); 
+
+                } catch (error) {
+                    console.error('Failed to import deck:', error);
+                    alert('Failed to import deck. Check console for details.');
+                    event.target.value = null;
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        // NEW: Reset Deck function
+        function resetDeck() {
+            
+            // 1. Clear the storage
+            localStorage.removeItem('kt2024Deck');
+            localStorage.removeItem('kt2024GlobalWidth'); // Also clear the saved width
+
+            // 2. Clear the internal state
+            cardCollection = [];
+
+            // 3. Clear the visible cards from the DOM
+            datacardContainer.innerHTML = '';
+            
+            // 4. Reset global width to default
+            globalCardWidth = 840; // Reset to the hardcoded default
+            cardWidthSlider.value = globalCardWidth;
+            cardWidthValue.textContent = globalCardWidth;
+
+            // 5. Create one new blank card
+            // This will also re-populate the manager list and save the new blank state
+            createNewCard();
+        }
+        
+        
+        function formatAbilityDescription(description) {
+            if (!description) return '';
+            const lines = description.split('\n');
+            let formattedHtml = '';
+            lines.forEach(line => {
+                if (line.startsWith('+ ')) {
+                    formattedHtml += `<p class="positive">${line.substring(2)}</p>`;
+                } else if (line.startsWith('- ')) {
+                    formattedHtml += `<p class="negative">${line.substring(2)}</p>`;
+                } else if (line.trim() !== '') { 
+                    formattedHtml += `<p>${line}</p>`;
+                }
+            });
+            return formattedHtml;
+        }
+
+        function parseDatabase() {
+            const dbText = keywordDatabase.value;
+            dbMap.clear(); 
+            const lines = dbText.split('\n');
+            for (const line of lines) {
+                const parts = line.split(':');
+                if (parts.length >= 2) {
+                    const ruleName = parts[0].trim();
+                    const ruleDef = parts.slice(1).join(':').trim();
+                    dbMap.set(ruleName, ruleDef);
+                }
+            }
+        }
+
+        function findBaseRule(rule, dbMap) {
+            if (dbMap.has(rule)) return rule;
+            const parts = rule.split(' ');
+            if (parts.length < 2) return null;
+            const baseRuleName = parts.slice(0, -1).join(' ') + ' x'; 
+            if (dbMap.has(baseRuleName)) {
+                return baseRuleName;
+            }
+            return null;
+        }
+
+        // --- SECTION G: EVENT LISTENERS ---
+        
+        // --- 1. Card Manager Listeners ---
+        addNewCardBtn.addEventListener('click', createNewCard);
+
+        // --- 2. Simple Input Listeners ---
+        const allSimpleInputs = [
+            unitNameInput, unitTitleInput, aplValue, moveValue, saveValue,
+            woundsValue, keywordsInput, baseSizeInput, displayKeywordDefinitions
+        ];
+        allSimpleInputs.forEach(input => {
+            input.addEventListener('input', updateActiveCardFromMenu);
+        });
+        
+        keywordDatabase.addEventListener('input', () => {
+            parseDatabase();
+            cardCollection.forEach(card => updateCardDisplay(card));
+        });
+
+        // --- 3. Card Dimension Listeners ---
+        cardWidthSlider.addEventListener('input', () => {
+            cardWidthValue.textContent = cardWidthSlider.value;
+            globalCardWidth = cardWidthSlider.value;
+            
+            document.querySelectorAll('.main-rectangle').forEach(cardEl => {
+                cardEl.style.width = `${globalCardWidth}px`;
+            });
+            
+            // Call the new save function whenever the slider is moved
+            saveGlobalWidthToLocalStorage();
+        });
+        cardHeightSlider.addEventListener('input', () => {
+            cardHeightValue.textContent = cardHeightSlider.value;
+            updateActiveCardFromMenu();
+        });
+
+        // --- 4. Dynamic Input Listeners (Add/Remove) ---
+        addWeaponBtn.addEventListener('click', addWeaponToMenu);
+        addAbilityBtn.addEventListener('click', addAbilityToMenu);
+
+        function handleRemoveClick(event) {
+            const cardData = getCardData(activeCardId);
+            if (!cardData) return;
+
+            if (event.target.dataset.remove === 'weapon') {
+                const weaponId = event.target.dataset.id;
+                cardData.weapons = cardData.weapons.filter(w => w.id.toString() !== weaponId);
+                event.target.closest('.weapon-input-group').remove();
+                updateCardDisplay(cardData);
+                
+                saveDeckToLocalStorage();
+            }
+            
+            if (event.target.dataset.remove === 'ability') {
+                const abilityId = event.target.dataset.id;
+                cardData.abilities = cardData.abilities.filter(a => a.id.toString() !== abilityId);
+                event.target.closest('.ability-input-group').remove();
+                updateCardDisplay(cardData);
+                
+                saveDeckToLocalStorage();
+            }
+        }
+        weaponInputsContainer.addEventListener('click', handleRemoveClick);
+        abilityInputsContainer.addEventListener('click', handleRemoveClick);
+        
+        weaponInputsContainer.addEventListener('input', updateActiveCardFromMenu);
+        abilityInputsContainer.addEventListener('input', updateActiveCardFromMenu);
+
+        // --- 5. Portrait & Identity Listeners ---
+        swapNamesBtn.addEventListener('click', () => {
+            const nameVal = unitNameInput.value;
+            const titleVal = unitTitleInput.value;
+            unitNameInput.value = titleVal;
+            unitNameInput.value = nameVal;
+            updateActiveCardFromMenu();
+        });
+        
+        uploadPortraitBtn.addEventListener('click', () => {
+            portraitFile.click(); 
+        });
+
+        clearPortraitBtn.addEventListener('click', () => {
+            const cardData = getCardData(activeCardId);
+            if (!cardData) return;
+            cardData.portrait = { src: '', posX: 0, posY: 0, scale: 1, fit: 'cover' };
+            updateCardDisplay(cardData);
+            
+            saveDeckToLocalStorage(); // 
+        });
+
+        portraitFile.addEventListener('change', () => {
+            const cardData = getCardData(activeCardId);
+            if (!cardData) return;
+            
+            const file = portraitFile.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    cardData.portrait.src = e.target.result;
+                    cardData.portrait.posX = 0;
+                    cardData.portrait.posY = 0;
+                    cardData.portrait.scale = 1;
+                    updateCardDisplay(cardData);
+                    
+                    saveDeckToLocalStorage(); 
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function updateImageTransform(prop, value, relative = false, operation = null) {
+            const cardData = getCardData(activeCardId);
+            if (!cardData) return;
+            
+            if (relative) {
+                if (operation) {
+                    cardData.portrait[prop] = operation(value, cardData.portrait[prop]);
+                } else {
+                    cardData.portrait[prop] += value;
+                }
+            } else {
+                cardData.portrait[prop] = value;
+            }
+            updateCardDisplay(cardData);
+            
+            saveDeckToLocalStorage(); 
+        }
+                
+        moveUpBtn.addEventListener('click', () => updateImageTransform('posY', -2.5, true));
+        moveDownBtn.addEventListener('click', () => updateImageTransform('posY', 2.5, true));
+        moveLeftBtn.addEventListener('click', () => updateImageTransform('posX', -2.5, true));
+        moveRightBtn.addEventListener('click', () => updateImageTransform('posX', 2.5, true));
+        zoomInBtn.addEventListener('click', () => updateImageTransform('scale', 1.05, true, (val, old) => old * val));
+        zoomOutBtn.addEventListener('click', () => updateImageTransform('scale', 1/1.05, true, (val, old) => old * val));
+        
+        fitToggleBtn.addEventListener('click', () => {
+            const cardData = getCardData(activeCardId);
+            if (!cardData) return;
+            
+            if (cardData.portrait.fit === 'cover') {
+                cardData.portrait.fit = 'contain';
+                cardData.portrait.posX = 0;
+                cardData.portrait.posY = 0;
+                cardData.portrait.scale = 1;
+            } else {
+                cardData.portrait.fit = 'cover';
+            }
+            updateCardDisplay(cardData);
+            
+            saveDeckToLocalStorage(); 
+        });
+
+        // --- 6. Modal & Print Listeners ---
+        
+        toggleDbBtn.addEventListener('click', () => {
+            keywordDatabase.classList.toggle('hidden-db');
+        });
+
+        helpToggleBtn.addEventListener('click', () => {
+            helpModal.style.display = 'block';
+        });
+
+        closeHelpBtn.addEventListener('click', () => {
+            helpModal.style.display = 'none';
+        });
+
+        menuToggle.addEventListener('click', () => {
+            menuPanel.classList.toggle('hidden');
+            editorPanel.classList.toggle('hidden'); 
+        });
+        
+        // --- 7. Modal & UI Listeners ---
+        exportDeckBtn.addEventListener('click', exportDeck);
+        importDeckBtn.addEventListener('click', () => importDeckFile.click()); // Triggers hidden file input
+        importDeckFile.addEventListener('change', importDeck);
+        resetDeckBtn.addEventListener('click', resetDeck); // 
+
+
+        // --- SECTION H: INITIALIZATION ---
+        
+        function loadDeckFromLocalStorage() {
+            const savedDeck = localStorage.getItem('kt2024Deck');
+            if (savedDeck) {
+                try {
+                    cardCollection = JSON.parse(savedDeck);
+                    if (!Array.isArray(cardCollection) || cardCollection.length === 0) {
+                        // If data is corrupt or empty, start fresh
+                        throw new Error('Invalid deck data in localStorage.');
+                    }
+                    
+                    // Rebuild the DOM from the loaded data
+                    cardCollection.forEach(cardData => {
+                        // updateCardDisplay (called by createCardElement)
+                        // will use the globalCardWidth that was set by loadGlobalWidthFromLocalStorage()
+                        const newCardElement = createCardElement(cardData);
+                        datacardContainer.appendChild(newCardElement);
+                    });
+                    
+                    // Set the first card as active
+                    setActiveCard(cardCollection[0].id);
+
+                } catch (error) {
+                    console.error('Failed to load deck from localStorage:', error);
+                    localStorage.removeItem('kt2024Deck'); // Clear bad data
+                    createNewCard(); // Start with one card
+                }
+            } else {
+                createNewCard(); // Start with one card
+            }
+        }
+        
+        parseDatabase();
+        
+        // Load the global width *before* loading the deck
+        // so the cards are created with the correct width
+        loadGlobalWidthFromLocalStorage(); 
+        
+        loadDeckFromLocalStorage(); 
+    });
+    </script>
+</body>
+</html>
