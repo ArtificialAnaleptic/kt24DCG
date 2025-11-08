@@ -64,7 +64,7 @@
         }
 
         .menu-panel {
-            width: 350px;
+            width: 400px;
             min-width: 300px; 
             height: 100vh;
             padding: 15px;
@@ -74,10 +74,10 @@
         }
         
         .editor-panel {
-            width: 350px;
+            width: 450px;
             min-width: 300px; 
             height: 100vh;
-            padding: 15px;
+            padding: 20px;
             background-color: #1e1e1e;
             border-left: 2px solid #000;
             display: flex;
@@ -87,8 +87,8 @@
         .editor-fields-container {
             flex-grow: 1;
             overflow-y: auto;
-            padding-right: 5px; 
-            margin-right: -5px;
+            padding-right: 20px; 
+            margin-right: -20px;
         }
 
 
@@ -203,6 +203,7 @@
         }
         .portrait-upload-group {
             display: flex;
+            margin-bottom: 10px;
         }
         .portrait-upload-group .add-button {
             flex-grow: 1;
@@ -291,15 +292,16 @@
         /* --- 4a. Header & Stats --- */
         .header {
             display: flex;
-            justify-content: space-between; 
-            align-items: flex-start; 
+            justify-content: space-between; /* Changed from space-between */
+            align-items: flex-start; /* ADDED */
             background-color: #1e1e1e;
             color: white;
             padding: 10px 15px;
             min-height: 100px;
             position: relative;
             border-bottom: 4px solid var(--brand-orange);
-            padding-bottom: 15px; 
+            /* ADJUSTMENT 1: Reduced padding to shrink header height */
+            padding-bottom: 15px; /* Was 30px */
         }
 
         .unit-identity-output {
@@ -307,8 +309,10 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            max-width: calc(50% - 70px); 
-            min-width: 140px; 
+            /* z-index: 1; */ /* REMOVED */
+            /* padding-right: 60px; */ /* REMOVED */
+            max-width: calc(50% - 70px); /* ADDED: 50% - half triangle - gap */
+            min-width: 140px; /* ADDED: Prevents extreme crushing */
         }
 
         .unit-name {
@@ -341,13 +345,17 @@
 
         .stats-output-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px; 
+            /* ADJUSTMENT 2: Changed to 2 columns for 2x2 grid */
+            grid-template-columns: repeat(2, 1fr); /* Was repeat(4, 1fr) */
+            /* ADJUSTMENT 3: Reduced gap for the 2x2 grid */
+            gap: 10px; /* Was 16px */
+            /* padding-left: 60px; */ /* REMOVED */
+            /* z-index: 5; */ /* REMOVED */
             text-align: center;
             align-content: center;
-            flex-shrink: 0; 
-            max-width: calc(50% - 70px); 
-            min-width: 140px; 
+            flex-shrink: 0; /* ADDED: Stop this block from crushing */
+            max-width: calc(50% - 70px); /* ADDED: 50% - half triangle - gap */
+            min-width: 140px; /* ADDED: Prevents extreme crushing */
         }
 
         .stat-block {
@@ -372,11 +380,17 @@
 
         /* --- 4b. Portrait Image (The Triangle) --- */
         .triangle-wrapper {
+            /* position: absolute; */ /* REMOVED */
+            /* top: 4px; */ /* REMOVED */
+            /* left: 50%; */ /* REMOVED */
+            /* transform: translateX(-50%); */ /* REMOVED */
             width: 165px;
             height: 145px; 
-            flex-shrink: 0; 
-            position: relative; 
-            top: 4px; 
+            /* z-index: 2; */ /* REMOVED */
+            flex-shrink: 0; /* ADDED: This is the key, prevents crushing */
+            position: relative; /* ADDED: for child elements */
+            top: 4px; /* ADDED: To match original offset */
+            /* ADJUSTMENT 4: Added 'left' to offset portrait. Adjust this value. */
             left: 20px; 
         }
 
@@ -415,7 +429,7 @@
         /* --- 4c: Weapons Table --- */
         .content-area {
             padding: 15px;
-            padding-top: 10px; /* Was 25px */
+            padding-top: 10px;
             flex-grow: 0;
             flex-shrink: 0;
         }
@@ -484,19 +498,12 @@
         .active-abilities-container {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            background-color: #e0e0e0; 
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 10px;
-            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+      _       gap: 10px;
         }
         .active-ability-card {
             background-color: #f0f0f0; 
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            overflow: hidden; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 3px solid #e7a133;
+            overflow: hidden;
         }
         .active-ability-header {
             display: flex;
@@ -557,15 +564,15 @@
             font-weight: 900;
         }
         .positive::before {
-            content: '\f04b '; 
-            font-family: "Font Awesome 6 Free"; 
+            content: '\f04b ';
+            font-family: "Font Awesome 6 Free";
             font-weight: 900; 
             color: #28a745; 
             margin-right: 5px;
         }
         .negative::before {
             content: '\f0c8 '; 
-            font-family: "Font Awesome 6 Free"; 
+            font-family: "Font Awesome 6 Free";
             font-weight: 900; 
             color: #dc3545; 
             margin-right: 5px;
@@ -653,15 +660,30 @@
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
-            width: 500px;
+
+            /* 1. Add responsive width */
+            width: 90%;
+            max-width: 800px; 
+
+            /* 2. Add responsive height */
+            max-height: 90vh; /* 90% of viewport height */
+
+            /* 3. Enable flex layout */
+            flex-direction: column;
+
+            /* 4. Adjust padding for new button position */
+            padding: 20px;
+            padding-top: 40px; 
+
             background-color: #333;
             border: 1px solid #888;
-            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.7);
         }
         .close-btn {
-            float: right;
+            position: absolute;
+            top: 10px;
+            right: 15px;
             font-size: 1.5rem;
             font-weight: 700;
             cursor: pointer;
@@ -670,10 +692,12 @@
             color: #aaa;
         }
         .modal-sections {
-            display: flex;
+            display: flex; /* <-- ADD THIS LINE */
             justify-content: space-between;
-            gap: 15px;
+      L       gap: 15px;
             margin-top: 15px;
+            overflow-y: auto;
+            flex-shrink: 1;
         }
         .modal-section-to-add, .modal-section-to-fix {
             width: 50%;
@@ -695,66 +719,50 @@
         }
 
 
-        /* --- 6. Mobile & Print Styles --- */
-        @media (max-width: 800px) {
-            .app-layout {
-                flex-direction: column;
-            }
-            .menu-panel {
-                width: 100%;
-                height: auto;
-                max-height: 50vh; 
-                border-right: none;
-                border-bottom: 2px solid #000;
-                order: 1; 
-            }
-            .editor-panel { 
-                width: 100%;
-                height: auto;
-                max-height: 50vh; 
-                border-left: none;
-                border-bottom: 2px solid #000;
-                order: 2; 
-            }
-            .menu-panel.hidden, .editor-panel.hidden { 
-                display: none;
-            }
-            .datacard-container {
-                order: 3; 
-                height: auto;
-                padding: 10px;
-            }
-            .main-rectangle {
-                width: 100%; 
-                min-height: 0;
-            }
-            .toggle-menu {
-                display: block; 
-            }
-            .header {
-                flex-direction: column;
-            }
-            .stats-output-grid {
-                grid-template-columns: repeat(4, 1fr); 
-                width: 100%;
-                margin-top: 60px; 
-                padding-left: 0; 
-                gap: 5px;
-            }
-            .stat-block-value {
-                font-size: 1.8rem;
-            }
-            .triangle-wrapper {
-                top: 50px;
-                width: 100px;
-                height: 100px;
-            }
-            .abilities-area.has-passive-and-active {
-                display: block;
-            }
-            .abilities-area.has-passive-and-active .active-abilities-container {
-                width: 100%;
-                margin-top: 15px;
+                /* --- 6. Resolution Overlay --- */
+        #resolution-overlay {
+            /* Hidden by default */
+            display: none; 
+            
+            /* Overlay styles */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 10000;
+
+            /* Centering content */
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .overlay-content {
+            background-color: #1e1e1e;
+            padding: 30px 40px;
+            border-radius: 8px;
+            border: 1px solid #555;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        .overlay-content .fas {
+            font-size: 3rem;
+            color: var(--brand-orange);
+            margin-bottom: 15px;
+        }
+
+        .overlay-content p {
+            font-size: 1.1rem;
+            margin: 5px 0;
+        }
+
+        /* This is the logic that SHOWS the overlay */
+        @media (max-width: 1365px), (max-height: 767px) {
+            #resolution-overlay {
+                display: flex; /* Show the overlay */
             }
         }
 
@@ -775,35 +783,62 @@
                     </ul>
             </div>
             
-            <h3>Weapons Rules Database (Name: Definition)</h3>
-            <textarea id="keywordDatabase" rows="5" class="hidden-db">
+            <h3>Weapons Rules:</h3>
+            <button id="toggleDbBtn" class="add-button" style="background-color: #28a745; margin-bottom: 10px;">Toggle Database</button>
+            <textarea id="keywordDatabase"class="hidden-db">
 Accurate x: Retain x normal hits without rolling. (up to 2)
+
 Balanced: Re-roll one attack dice.
+
 Blast x: Make attacks against all operatives within x" of the target, visible to the target.
+
 Brutal: Can only be blocked with Criticals.
+
 Ceaseless: Re-roll all results of one number (e.g. 2's).
+
 Devastating x: Crits inflict x damage immediately, before rolling saves.
+
 D* Devastating x: Crits inflict x damage to all operatives within D".
+
 Heavy: Cannot shoot in the same activation as moved.
+
 Heavy (x only): Can only move x" in the same activation as shooting.
+
 Hot: After shooting, roll 1D6. If lower than the Hit stat, suffer 2x result damage.
+
 Lethal x: Inflict crits with x+ instead of 6+.
+
 Limited x: Has x uses per battle (multi-attack like Blast counts as one use).
+
 Piercing x: Remove x defence dice before rolling.
+
 Piercing x Crits: Remove x defence dice before rolling, if a critical success is rolled.
+
 Punishing: Retain a fail as a success if any crits are retained.
+
 Range x: Target must be within x" of the shooter.
+
 Relentless: Re-roll any or all attack dice.
+
 Rending: Convert a hit to a critical if any crits are retained.
+
 Saturate: The defender cannot retain any cover saves.
+
 Seek: Targets cannot use terrain for cover.
+
 Seek Light: Targets cannot use light terrain for cover.
+
 Severe: Convert a hit to a critical if no criticals are retained.
+
 Shock: First Critical strike discards opponent's worst success.
+
 Silent: Can Shoot whilst on a conceal order.
+
 Stun: Remove 1APL from the target if any Critical Successes are retained.
+
 Torrent x: Make attacks against all operatives within x" of the target, visible to the shooter.</textarea>
-            <button id="toggleDbBtn">Toggle Database</button>
+
+            
             
             <h3 style="margin-top: 15px;">Import / Export Deck</h3>
             <button id="exportDeckBtn" class="add-button" style="background-color: var(--brand-orange); margin-top: 10px;">Export Deck (JSON)</button>
@@ -829,9 +864,6 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                         <label for="unitTitleInput">Unit Title</label>
                         <input type="text" id="unitTitleInput" value="Operative Title">
                     </div>
-                    <button id="swapNamesBtn" class="swap-button" title="Swap Name and Title">
-                        <i class="fas fa-exchange-alt"></i> 
-                    </button>
                 </div>
                 <label for="portraitFile">Portrait Image</label>
                 <div class="portrait-upload-group">
@@ -893,7 +925,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                 <input type="text" id="keywordsInput" value="TEAM NAME, FACTION, SUBFACTION, RANK">
 
                 <label for="baseSizeInput">Base Size (mm)</label>
-                <input type="number" id="baseSizeInput" value="25">
+                <input type="number" id="baseSizeInput" value="32">
             </div> </aside>
     </div>
     
@@ -965,7 +997,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                 <div class="keywords-list" data-output="dataCardKeywords">
                     </div>
                 <div class="base-size-circle" data-output="baseSizeOutput">
-                    25
+                    32
                 </div>
             </div>
         </div>
@@ -973,7 +1005,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
     
     <div class="help-modal-box" id="helpModal">
         <span class="close-btn" id="closeHelpBtn" title="Close"><i class="fas fa-times"></i></span>
-        <p><strong>This tool is based heavily on the work of /u/setounet.</strong><br>I was given a partial version of this adapted version and attempted to fix it.</p>
+        <p><strong>This tool is based heavily on the work of /u/setounet.</strong><br>I was given an incomplete attempt by another user to duplicate a card generator and I have attempted to fix it.</p>
         <p>HTML is really not my strong point so if this hasn't been updated it's worth checking out /u/setounet's  <a href="https://www.kttools.app" target="_blank" rel="noopener noreferrer">https://www.kttools.app</a> to see if he's improved it instead :)</p>
         
         <div class="modal-sections">
@@ -981,7 +1013,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                 <h4>To be added:</h4>
                 <ul>
                     <li>Print options. I tried this but it's quite hard to get it to print exactly how it looks in the page. I would recommend zooming the page as far as your monitor allows and screenclipping it into your favorite image editor to save it (WINDOWS+SHIFT+S).</li>
-                    <li>Something to highlight the current card you're working on.</li>
+                    <li>Currently you can clip the bottom of the card off if you make the card too small/add too much content.</li>
                     <li>Probably a toggle to hide the side bars so you can just use the site with your cards if you like.</li>
                 </ul>
             </div>
@@ -993,8 +1025,14 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
             </div>
         </div>
     </div>
-    
-    <button class="toggle-menu" id="menuToggle">☰ Menu</button>
+        
+    <div id="resolution-overlay">
+        <div class="overlay-content">
+            <i class="fas fa-desktop"></i>
+            <p>This application requires a minimum resolution of 1366x768.</p>
+            <p>Please resize your browser window.</p>
+        </div>
+    </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -1009,7 +1047,6 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
         // Inputs
         const unitNameInput = document.getElementById('unitNameInput');
         const unitTitleInput = document.getElementById('unitTitleInput');
-        const swapNamesBtn = document.getElementById('swapNamesBtn');
 
         const portraitFile = document.getElementById('portraitFile');
         const uploadPortraitBtn = document.getElementById('uploadPortraitBtn');
@@ -1041,11 +1078,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
 
         const helpToggleBtn = document.getElementById('helpToggleBtn');
         const closeHelpBtn = document.getElementById('closeHelpBtn');
-        const helpModal = document.getElementById('helpModal');
-
-        const menuToggle = document.getElementById('menuToggle');
-        const menuPanel = document.querySelector('.menu-panel');
-        const editorPanel = document.querySelector('.editor-panel'); 
+        const helpModal = document.getElementById('helpModal'); 
 
         const cardWidthSlider = document.getElementById('cardWidthSlider');
         const cardWidthValue = document.getElementById('cardWidthValue');
@@ -1060,7 +1093,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
         const exportDeckBtn = document.getElementById('exportDeckBtn');
         const importDeckBtn = document.getElementById('importDeckBtn');
         const importDeckFile = document.getElementById('importDeckFile');
-        const resetDeckBtn = document.getElementById('resetDeckBtn'); // 
+        const resetDeckBtn = document.getElementById('resetDeckBtn'); // <-- ADD THIS
 
 
         // --- SECTION A: STATE MANAGEMENT ---
@@ -1100,7 +1133,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                     { id: Date.now() + 2, type: 'Passive', title: 'Ability 1', cost: '', once: false, effect: 'Effect description...\n+ A positive effect.\n- A negative effect.' }
                 ],
                 keywords: 'TEAM NAME, FACTION, SUBFACTION, RANK',
-                baseSize: 25
+                baseSize: 32
             };
         }
         
@@ -1323,6 +1356,8 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
             
             updateCardDisplay(cardData);
             
+            // --- FIX 2a (ADD) ---
+            // Save state after adding a new item
             saveDeckToLocalStorage();
         }
         
@@ -1346,6 +1381,8 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
             
             updateCardDisplay(cardData);
             
+            // --- FIX 2a (ADD) ---
+            // Save state after adding a new item
             saveDeckToLocalStorage();
         }
 
@@ -1425,6 +1462,8 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
 
             // --- 1. Dimensions & Portrait ---
             
+            // --- FIX 1 (RENDER) ---
+            // All cards now use the globalCardWidth, which is loaded from localStorage on init
             cardElement.style.width = `${globalCardWidth}px`; 
             cardElement.style.minHeight = `${cardData.cardDimensions.height}px`;
             
@@ -1601,11 +1640,13 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
             }
         }
         
+        // --- FIX 1 (SAVE) ---
         // New function to save just the global width
         function saveGlobalWidthToLocalStorage() {
             localStorage.setItem('kt2024GlobalWidth', globalCardWidth);
         }
         
+        // --- FIX 1 (LOAD) ---
         // New function to load just the global width
         function loadGlobalWidthFromLocalStorage() {
             const savedWidth = localStorage.getItem('kt2024GlobalWidth');
@@ -1651,7 +1692,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                     // Reset file input to allow re-importing the same file
                     event.target.value = null;
                     
-                    saveDeckToLocalStorage(); 
+                    saveDeckToLocalStorage(); // <-- ADD THIS
 
                 } catch (error) {
                     console.error('Failed to import deck:', error);
@@ -1664,7 +1705,13 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
         
         // NEW: Reset Deck function
         function resetDeck() {
-            
+            // --- FIX 3 (CONFIRM) ---
+            // Removed the `confirm()` call as it's disallowed in some environments.
+            // You should replace this with a custom modal for better UX.
+            // if (!confirm('Are you sure you want to delete all cards and start over? This cannot be undone.')) {
+            //     return; // User cancelled
+            // }
+
             // 1. Clear the storage
             localStorage.removeItem('kt2024Deck');
             localStorage.removeItem('kt2024GlobalWidth'); // Also clear the saved width
@@ -1746,6 +1793,11 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
             cardCollection.forEach(card => updateCardDisplay(card));
         });
 
+        keywordDatabase.addEventListener('input', () => {
+            keywordDatabase.style.height = 'auto';
+            keywordDatabase.style.height = (keywordDatabase.scrollHeight + 2) + 'px';
+        });
+
         // --- 3. Card Dimension Listeners ---
         cardWidthSlider.addEventListener('input', () => {
             cardWidthValue.textContent = cardWidthSlider.value;
@@ -1755,6 +1807,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                 cardEl.style.width = `${globalCardWidth}px`;
             });
             
+            // --- FIX 1 (SAVE) ---
             // Call the new save function whenever the slider is moved
             saveGlobalWidthToLocalStorage();
         });
@@ -1777,6 +1830,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                 event.target.closest('.weapon-input-group').remove();
                 updateCardDisplay(cardData);
                 
+                // --- FIX 2b (REMOVE) ---
                 saveDeckToLocalStorage();
             }
             
@@ -1786,6 +1840,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                 event.target.closest('.ability-input-group').remove();
                 updateCardDisplay(cardData);
                 
+                // --- FIX 2b (REMOVE) ---
                 saveDeckToLocalStorage();
             }
         }
@@ -1796,14 +1851,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
         abilityInputsContainer.addEventListener('input', updateActiveCardFromMenu);
 
         // --- 5. Portrait & Identity Listeners ---
-        swapNamesBtn.addEventListener('click', () => {
-            const nameVal = unitNameInput.value;
-            const titleVal = unitTitleInput.value;
-            unitNameInput.value = titleVal;
-            unitNameInput.value = nameVal;
-            updateActiveCardFromMenu();
-        });
-        
+                
         uploadPortraitBtn.addEventListener('click', () => {
             portraitFile.click(); 
         });
@@ -1814,7 +1862,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
             cardData.portrait = { src: '', posX: 0, posY: 0, scale: 1, fit: 'cover' };
             updateCardDisplay(cardData);
             
-            saveDeckToLocalStorage(); // 
+            saveDeckToLocalStorage(); // <-- This was correct!
         });
 
         portraitFile.addEventListener('change', () => {
@@ -1831,7 +1879,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                     cardData.portrait.scale = 1;
                     updateCardDisplay(cardData);
                     
-                    saveDeckToLocalStorage(); 
+                    saveDeckToLocalStorage(); // <-- This was correct!
                 };
                 reader.readAsDataURL(file);
             }
@@ -1852,7 +1900,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
             }
             updateCardDisplay(cardData);
             
-            saveDeckToLocalStorage(); 
+            saveDeckToLocalStorage(); // <-- This was correct!
         }
                 
         moveUpBtn.addEventListener('click', () => updateImageTransform('posY', -2.5, true));
@@ -1876,33 +1924,38 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
             }
             updateCardDisplay(cardData);
             
-            saveDeckToLocalStorage(); 
+            saveDeckToLocalStorage(); // <-- This was correct!
         });
 
         // --- 6. Modal & Print Listeners ---
         
         toggleDbBtn.addEventListener('click', () => {
             keywordDatabase.classList.toggle('hidden-db');
+            
+            // Check if the database is now visible
+            if (!keywordDatabase.classList.contains('hidden-db')) {
+                // If visible, calculate its proper height
+                keywordDatabase.style.height = 'auto'; // 1. Reset height
+                keywordDatabase.style.height = (keywordDatabase.scrollHeight + 2) + 'px'; // 2. Set to content height + 2px for border
+            } else {
+                // If hidden, remove the inline style
+                keywordDatabase.style.height = '';
+    _       }
         });
 
         helpToggleBtn.addEventListener('click', () => {
-            helpModal.style.display = 'block';
+            helpModal.style.display = 'flex';
         });
 
         closeHelpBtn.addEventListener('click', () => {
             helpModal.style.display = 'none';
-        });
-
-        menuToggle.addEventListener('click', () => {
-            menuPanel.classList.toggle('hidden');
-            editorPanel.classList.toggle('hidden'); 
         });
         
         // --- 7. Modal & UI Listeners ---
         exportDeckBtn.addEventListener('click', exportDeck);
         importDeckBtn.addEventListener('click', () => importDeckFile.click()); // Triggers hidden file input
         importDeckFile.addEventListener('change', importDeck);
-        resetDeckBtn.addEventListener('click', resetDeck); // 
+        resetDeckBtn.addEventListener('click', resetDeck); // <-- ADD THIS
 
 
         // --- SECTION H: INITIALIZATION ---
@@ -1940,6 +1993,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
         
         parseDatabase();
         
+        // --- FIX 1 (LOAD) ---
         // Load the global width *before* loading the deck
         // so the cards are created with the correct width
         loadGlobalWidthFromLocalStorage(); 
@@ -1947,5 +2001,6 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
         loadDeckFromLocalStorage(); 
     });
     </script>
+
 </body>
 </html>
