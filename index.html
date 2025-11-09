@@ -1721,6 +1721,18 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
 
 
         // --- SECTION F: HELPER FUNCTIONS ---
+
+        // Debounce function
+        function debounce(func, delay) {
+            let timeoutId;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    func.apply(context, args);
+                }, delay);
+            };
+        }
         
         // NEW: Export function
         function exportDeck() {
@@ -1898,6 +1910,9 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
         }
 
         // --- SECTION G: EVENT LISTENERS ---
+
+        // Create a debounced version of the update function
+        const debouncedUpdate = debounce(updateActiveCardFromMenu, 300); // 300ms delay
         
         // --- 1. Card Manager Listeners ---
         addNewCardBtn.addEventListener('click', createNewCard);
@@ -1908,7 +1923,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
             woundsValue, keywordsInput, baseSizeInput, displayKeywordDefinitions
         ];
         allSimpleInputs.forEach(input => {
-            input.addEventListener('input', updateActiveCardFromMenu);
+            input.addEventListener('input', debouncedUpdate);
         });
         
         keywordDatabase.addEventListener('input', () => {
@@ -1929,13 +1944,29 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
             document.querySelectorAll('.main-rectangle').forEach(cardEl => {
                 cardEl.style.width = `${globalCardWidth}px`;
             });
-            
-            // --- FIX 1 (SAVE) ---
-            // Call the new save function whenever the slider is moved
-            saveGlobalWidthToLocalStorage();
+        });
+
+        // 2. Save the data only on 'change' (when you let go)
+        cardWidthSlider.addEventListener('change', () => {
+            saveGlobalWidthToLocalStorage(); 
         });
         cardHeightSlider.addEventListener('input', () => {
+            if (!activeCardId) return;
+
+            // Update the text
             cardHeightValue.textContent = cardHeightSlider.value;
+            
+            // Find the active card element
+            const cardElement = datacardContainer.querySelector(`.main-rectangle[data-card-id="${activeCardId}"]`);
+            if (cardElement) {
+                // Update *only* the height style
+                cardElement.style.minHeight = `${cardHeightSlider.value}px`;
+            }
+        });
+
+        // 2. Save the data only on 'change' (when you let go)
+        cardHeightSlider.addEventListener('change', () => {
+            // Now run the full data update and save
             updateActiveCardFromMenu();
         });
 
@@ -1970,8 +2001,8 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
         weaponInputsContainer.addEventListener('click', handleRemoveClick);
         abilityInputsContainer.addEventListener('click', handleRemoveClick);
         
-        weaponInputsContainer.addEventListener('input', updateActiveCardFromMenu);
-        abilityInputsContainer.addEventListener('input', updateActiveCardFromMenu);
+        weaponInputsContainer.addEventListener('input', debouncedUpdate); 
+        abilityInputsContainer.addEventListener('input', debouncedUpdate);
 
         // --- 5. Portrait & Identity Listeners ---
                 
