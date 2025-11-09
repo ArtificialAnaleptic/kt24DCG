@@ -744,6 +744,9 @@
             display: none;
         }
 
+        body.sidebars-hidden .sidebar-toggle-btn {
+            left: 10px; /* Move button to the screen edge */
+        }
 
                 /* --- 6. Resolution Overlay --- */
         #resolution-overlay {
@@ -783,13 +786,6 @@
         .overlay-content p {
             font-size: 1.1rem;
             margin: 5px 0;
-        }
-
-        /* This is the logic that SHOWS the overlay */
-        @media (max-width: 1365px), (max-height: 767px) {
-            #resolution-overlay {
-                display: flex; /* Show the overlay */
-            }
         }
 
     </style>
@@ -1127,6 +1123,9 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
 
         // Sidebar Toggle
         const toggleSidebarsBtn = document.getElementById('toggleSidebarsBtn');
+
+        // Resolution check
+        const resolutionOverlay = document.getElementById('resolution-overlay');
 
 
         // --- SECTION A: STATE MANAGEMENT ---
@@ -1807,6 +1806,20 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
             return null;
         }
 
+
+        // Resolution check functions
+        function checkResolution() {
+            // Get the viewport size in *device pixels* (CSS Pixels * Pixel Ratio)
+            const physicalWidth = document.documentElement.clientWidth * window.devicePixelRatio;
+            const physicalHeight = document.documentElement.clientHeight * window.devicePixelRatio;
+
+            if (physicalWidth < 1366 || physicalHeight < 768) {
+                resolutionOverlay.style.display = 'flex';
+            } else {
+                resolutionOverlay.style.display = 'none';
+            }
+        }
+
         // --- SECTION G: EVENT LISTENERS ---
         
         // --- 1. Card Manager Listeners ---
@@ -2047,6 +2060,11 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
         loadGlobalWidthFromLocalStorage(); 
         
         loadDeckFromLocalStorage(); 
+
+        // Resolution checks
+        checkResolution(); // Run check on initial load
+        window.addEventListener('resize', checkResolution); // Run check on window resize or zoom
+
     });
     </script>
 
