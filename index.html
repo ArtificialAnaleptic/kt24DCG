@@ -692,7 +692,7 @@
             color: #aaa;
         }
         .modal-sections {
-            display: flex; /* <-- ADD THIS LINE */
+            display: flex; 
             justify-content: space-between;
       L       gap: 15px;
             margin-top: 15px;
@@ -716,6 +716,32 @@
             border: 1px solid white;
             padding: 10px 15px;
             font-size: 1.5rem;
+        }
+
+        .sidebar-toggle-btn {
+            position: fixed;
+            top: 10px;
+            left: 410px; /* 400px left panel + 10px buffer */
+            z-index: 100;
+            background-color: #333;
+            color: var(--brand-orange);
+            border: 1px solid var(--brand-orange);
+            border-radius: 4px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: left 0.3s ease; /* For smooth movement */
+        }
+        .sidebar-toggle-btn:hover {
+            background-color: #444;
+            color: white;
+        }
+
+        /* This class will be toggled by JavaScript */
+        body.sidebars-hidden .menu-panel,
+        body.sidebars-hidden .editor-panel {
+            display: none;
         }
 
 
@@ -770,6 +796,10 @@
 </head>
 <body>
     <div class="app-layout">
+                <button id="toggleSidebarsBtn" class="sidebar-toggle-btn" title="Hide Sidebars">
+            <i class="fas fa-eye-slash"></i>
+        </button>
+        
         <aside class="menu-panel">
             
             <h2>Kill Team 2024 Data<br>Card Creator 
@@ -1013,7 +1043,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                 <h4>To be added:</h4>
                 <ul>
                     <li>Print options. I tried this but it's quite hard to get it to print exactly how it looks in the page. I would recommend zooming the page as far as your monitor allows and screenclipping it into your favorite image editor to save it (WINDOWS+SHIFT+S).</li>
-                    <li>Currently you can clip the bottom of the card off if you make the card too small/add too much content.</li>
+                    <li>Something to highlight the current card you're working on.</li>
                     <li>Probably a toggle to hide the side bars so you can just use the site with your cards if you like.</li>
                 </ul>
             </div>
@@ -1021,7 +1051,6 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                 <h4>To be fixed:</h4>
                 <ul>
                     <li>Formatting on Passive abilities is currently a little broken. I'll probably fix that.</li>
-                    <li>There are font issues that make things look weird in Brave browser on my system but Chrome and Firefox seem fine.</li>
                 </ul>
             </div>
         </div>
@@ -1094,7 +1123,10 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
         const exportDeckBtn = document.getElementById('exportDeckBtn');
         const importDeckBtn = document.getElementById('importDeckBtn');
         const importDeckFile = document.getElementById('importDeckFile');
-        const resetDeckBtn = document.getElementById('resetDeckBtn'); // <-- ADD THIS
+        const resetDeckBtn = document.getElementById('resetDeckBtn'); 
+
+        // Sidebar Toggle
+        const toggleSidebarsBtn = document.getElementById('toggleSidebarsBtn');
 
 
         // --- SECTION A: STATE MANAGEMENT ---
@@ -1693,7 +1725,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                     // Reset file input to allow re-importing the same file
                     event.target.value = null;
                     
-                    saveDeckToLocalStorage(); // <-- ADD THIS
+                    saveDeckToLocalStorage(); 
 
                 } catch (error) {
                     console.error('Failed to import deck:', error);
@@ -1863,7 +1895,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
             cardData.portrait = { src: '', posX: 0, posY: 0, scale: 1, fit: 'cover' };
             updateCardDisplay(cardData);
             
-            saveDeckToLocalStorage(); // <-- This was correct!
+            saveDeckToLocalStorage(); 
         });
 
         portraitFile.addEventListener('change', () => {
@@ -1880,7 +1912,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                     cardData.portrait.scale = 1;
                     updateCardDisplay(cardData);
                     
-                    saveDeckToLocalStorage(); // <-- This was correct!
+                    saveDeckToLocalStorage(); 
                 };
                 reader.readAsDataURL(file);
             }
@@ -1901,7 +1933,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
             }
             updateCardDisplay(cardData);
             
-            saveDeckToLocalStorage(); // <-- This was correct!
+            saveDeckToLocalStorage(); 
         }
                 
         moveUpBtn.addEventListener('click', () => updateImageTransform('posY', -2.5, true));
@@ -1925,7 +1957,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
             }
             updateCardDisplay(cardData);
             
-            saveDeckToLocalStorage(); // <-- This was correct!
+            saveDeckToLocalStorage(); 
         });
 
         // --- 6. Modal & Print Listeners ---
@@ -1956,7 +1988,22 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
         exportDeckBtn.addEventListener('click', exportDeck);
         importDeckBtn.addEventListener('click', () => importDeckFile.click()); // Triggers hidden file input
         importDeckFile.addEventListener('change', importDeck);
-        resetDeckBtn.addEventListener('click', resetDeck); // <-- ADD THIS
+        resetDeckBtn.addEventListener('click', resetDeck); 
+        toggleSidebarsBtn.addEventListener('click', () => {
+            document.body.classList.toggle('sidebars-hidden');
+            
+            // This part swaps the icon and tooltip text
+            const icon = toggleSidebarsBtn.querySelector('i');
+            if (document.body.classList.contains('sidebars-hidden')) {
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+                toggleSidebarsBtn.title = 'Show Sidebars';
+  s           } else {
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+                toggleSidebarsBtn.title = 'Hide Sidebars';
+            }
+        });
 
 
         // --- SECTION H: INITIALIZATION ---
