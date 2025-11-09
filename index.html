@@ -154,8 +154,31 @@
             line-height: 24px;
             text-align: center;
         }
+
         .delete-card-btn:hover {
             background: #c9302c;
+        }
+
+        .card-list-controls {
+            display: flex;
+            align-items: center;
+        }
+
+        .duplicate-card-btn {
+            background: #4a90e2; /* Blue to match 'add' buttons */
+            border: none;
+            color: white;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            line-height: 24px;
+            text-align: center;
+            margin-right: 5px; /* Spacing between buttons */
+        }
+        .duplicate-card-btn:hover {
+            background: #5aa1f0;
         }
 
         .add-button {
@@ -1205,6 +1228,43 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
             
             saveDeckToLocalStorage(); 
         }
+
+        // --- Duplicate card function ---
+        function duplicateCard(originalCardId) {
+            const originalCard = getCardData(originalCardId);
+            if (!originalCard) return;
+
+            // 1. Create a deep copy of the card data
+            const newCardData = JSON.parse(JSON.stringify(originalCard));
+            
+            // 2. Give it a new unique ID and update its name
+            newCardData.id = Date.now().toString();
+            newCardData.unitName = `${originalCard.unitName} (Copy)`;
+
+            // 3. Find the index of the original card
+            const originalIndex = cardCollection.findIndex(card => card.id === originalCardId);
+
+            // 4. Insert the new card into the data array right after the original
+            cardCollection.splice(originalIndex + 1, 0, newCardData);
+
+            // 5. Create the new card's HTML element
+            const newCardElement = createCardElement(newCardData);
+            
+            // 6. Insert the new element into the DOM right after the original
+            const originalCardElement = datacardContainer.querySelector(`.main-rectangle[data-card-id="${originalCardId}"]`);
+            if (originalCardElement) {
+                originalCardElement.after(newCardElement);
+            } else {
+                // Fallback if the original element wasn't found (shouldn't happen)
+                datacardContainer.appendChild(newCardElement);
+            }
+
+            // 7. Set the new card as active (this also re-renders the manager list)
+            setActiveCard(newCardData.id);
+            
+            // 8. Save the updated collection
+            saveDeckToLocalStorage();
+        }
         
         function setActiveCard(cardId) {
             activeCardId = cardId;
@@ -1419,7 +1479,6 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
         }
 
         // --- SECTION E: RENDER FUNCTIONS (The "Deck") ---
-        
         function renderCardManagerList() {
             cardManagerList.innerHTML = ''; 
             
@@ -1438,15 +1497,33 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                 
                 item.innerHTML = `
                     <span class="card-list-name">${card.unitName}</span>
-                    <button class="delete-card-btn" data-id="${card.id}">&times;</button>
+                    <div class="card-list-controls">
+                        <button class="duplicate-card-btn" data-id="${card.id}" title="Duplicate Card">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="delete-card-btn" data-id="${card.id}" title="Delete Card">
+                            &times;
+                        </button>
+                    </div>
                 `;
                 
                 item.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('delete-card-btn')) {
-                        deleteCard(card.id);
-                    } else {
-                        setActiveCard(card.id);
+                    // Find the closest button that was clicked, if any
+                    const deleteBtn = e.target.closest('.delete-card-btn');
+                    const duplicateBtn = e.target.closest('.duplicate-card-btn');
+
+                    if (duplicateBtn) {
+                        duplicateCard(card.id);
+                        return; // Stop
                     }
+                    
+                    if (deleteBtn) {
+                        deleteCard(card.id);
+                        return; // Stop
+                    }
+                    
+                    // If no button was clicked, it was a click on the item itself
+                    setActiveCard(card.id);
                 });
                 
                 cardManagerList.appendChild(item);
@@ -2011,7 +2088,7 @@ Torrent x: Make attacks against all operatives within x" of the target, visible 
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
                 toggleSidebarsBtn.title = 'Show Sidebars';
-  s           } else {
+            } else {
                 icon.classList.remove('fa-eye');
                 icon.classList.add('fa-eye-slash');
                 toggleSidebarsBtn.title = 'Hide Sidebars';
